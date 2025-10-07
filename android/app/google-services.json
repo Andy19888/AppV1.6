@@ -1,34 +1,113 @@
 {
   "project_info": {
-    "project_number": "YOUR_PROJECT_NUMBER",
-    "project_id": "repocheck-app",
-    "storage_bucket": "repocheck-app.appspot.com"
+    "project_number": "1045857395927",
+    "project_id": "proyectoalumnos-15b79",
+    "storage_bucket": "proyectoalumnos-15b79.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:YOUR_PROJECT_NUMBER:android:YOUR_APP_ID",
+        "mobilesdk_app_id": "1:1045857395927:android:80e6358f499e7aac113c92",
         "android_client_info": {
-          "package_name": "com.example.repocheck"
+          "package_name": "com.company.repocheck"
         }
       },
       "oauth_client": [
         {
-          "client_id": "YOUR_CLIENT_ID.apps.googleusercontent.com",
+          "client_id": "1045857395927-d9otka9uj6jb8c292cl2q62rjsr63ovt.apps.googleusercontent.com",
           "client_type": 3
         }
       ],
       "api_key": [
         {
-          "current_key": "YOUR_API_KEY"
+          "current_key": "AIzaSyDdPzWKoFiJtp5DDvShTvNuzlGyjEWcFnU"
         }
       ],
       "services": {
         "appinvite_service": {
           "other_platform_oauth_client": [
             {
-              "client_id": "YOUR_CLIENT_ID.apps.googleusercontent.com",
+              "client_id": "1045857395927-d9otka9uj6jb8c292cl2q62rjsr63ovt.apps.googleusercontent.com",
               "client_type": 3
+            },
+            {
+              "client_id": "1045857395927-7euv7pes7f54iemjgac23q25q3vvqp88.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.repocheck"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1045857395927:android:4a11d95335f4a8e0113c92",
+        "android_client_info": {
+          "package_name": "com.example.repocheck"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1045857395927-d9otka9uj6jb8c292cl2q62rjsr63ovt.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDdPzWKoFiJtp5DDvShTvNuzlGyjEWcFnU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1045857395927-d9otka9uj6jb8c292cl2q62rjsr63ovt.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "1045857395927-7euv7pes7f54iemjgac23q25q3vvqp88.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.repocheck"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1045857395927:android:30fddba1718c52df113c92",
+        "android_client_info": {
+          "package_name": "com.seminario"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1045857395927-d9otka9uj6jb8c292cl2q62rjsr63ovt.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDdPzWKoFiJtp5DDvShTvNuzlGyjEWcFnU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1045857395927-d9otka9uj6jb8c292cl2q62rjsr63ovt.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "1045857395927-7euv7pes7f54iemjgac23q25q3vvqp88.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.repocheck"
+              }
             }
           ]
         }

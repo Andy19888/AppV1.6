@@ -1,3 +1,4 @@
+import 'dart:typed_data'; // <-- AÑADIDO: Importación necesaria para Uint8List
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
@@ -174,11 +175,18 @@ class FirebaseService {
             .toList());
   }
 
-  // File Storage
-  static Future<String> uploadImage(String path, List<int> imageBytes) async {
+// File Storage
+  static Future<String> uploadImage(String path, Uint8List imageBytes) async {
+    // 1. Crear una referencia al archivo
     final ref = _storage.ref().child(path);
-    final uploadTask = ref.putData(Uint8List.fromList(imageBytes));
-    final snapshot = await uploadTask;
+    
+    // 2. Iniciar la tarea de subida usando putData
+    final uploadTask = ref.putData(imageBytes);
+
+    // 3. Esperar a que la tarea se complete y obtener el TaskSnapshot
+    final snapshot = await uploadTask.whenComplete(() => {});
+
+    // 4. Obtener la URL de descarga
     return await snapshot.ref.getDownloadURL();
   }
 

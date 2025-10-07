@@ -2,6 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/user_model.dart';
+import 'dart:async'; // Necesario para usar timeout
 
 class AuthService {
   final FirebaseAuth _auth = FirebaseAuth.instance;
@@ -131,8 +132,20 @@ final authServiceProvider = Provider<AuthService>((ref) => AuthService());
 // Provider for current user stream
 final authStateProvider = StreamProvider<User?>((ref) {
   final authService = ref.watch(authServiceProvider);
-  return authService.authStateChanges;
+
+  // CORRECCIÓN CLAVE: Aplicar un timeout y resolver a null si tarda mucho.
+  // Esto previene que la aplicación se quede en 'loading' si la conexión
+  // inicial es lenta o inestable, forzando la redirección a la pantalla de login.
+  return authService.authStateChanges.timeout(
+    const Duration(seconds: 4), // 4 segundos de límite para la carga inicial
+    onTimeout: (sink) {
+      // Si hay timeout, cerramos el stream actual y enviamos null (no autenticado)
+      sink.close();
+      sink.add(null); 
+    },
+  );
 });
+
 
 // Provider for current user data
 final currentUserProvider = FutureProvider<UserModel?>((ref) async {
@@ -142,7 +155,8 @@ final currentUserProvider = FutureProvider<UserModel?>((ref) async {
   return authState.when(
     data: (user) async {
       if (user != null) {
-        return await authService.getUserData(user.uid);
+        // La línea que estaba marcada en rojo antes
+        return await authService.getUserData(user.uid); 
       }
       return null;
     },

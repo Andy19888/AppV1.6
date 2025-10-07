@@ -177,16 +177,18 @@ class _LocationSelectionScreenState extends ConsumerState<LocationSelectionScree
           },
         );
       },
-      loading: () => const DropdownButtonFormField<String>(
-        decoration: InputDecoration(
+      
+      loading: () => DropdownButtonFormField<String>( // <-- 1. SIN 'const'
+        decoration: const InputDecoration( 
           labelText: 'Cargando provincias...',
           prefixIcon: Icon(Icons.location_on_outlined),
         ),
-        items: [],
+        items: const [], 
         onChanged: null,
-      ),
-      error: (error, stack) => Text('Error: $error'),
-    );
+      ), // <-- AQUI TERMINA EL WIDGET loading
+      
+      error: (error, stack) => Center(child: Text('Error: $error')), // <-- 2. CORREGIDO (Centrado)
+    ); // <-- Cierre correcto del provincesAsync.when()
   }
 
   Widget _buildLocalidadDropdown() {

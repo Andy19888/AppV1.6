@@ -16,6 +16,75 @@ class _TasksManagementScreenState extends ConsumerState<TasksManagementScreen> {
   String _searchQuery = '';
   TaskStatus? _filterStatus;
 
+  // Implementación del diálogo de edición de tarea
+  void _showEditTaskDialog(BuildContext context, TaskModel task) {
+    showDialog(
+      context: context,
+      builder: (context) => _EditTaskDialog(task: task),
+    );
+  }
+
+  // Implementación del diálogo de confirmación de eliminación de tarea
+  void _showDeleteConfirmation(BuildContext context, TaskModel task) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Eliminar Tarea'),
+        content: Text('¿Estás seguro de que quieres eliminar "${task.title}"?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('Cancelar'),
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              try {
+                final adminService = ref.read(adminServiceProvider);
+                await adminService.deleteTask(task.id);
+                if (context.mounted) {
+                  Navigator.of(context).pop();
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Tarea eliminada')),
+                  );
+                }
+              } catch (e) {
+                if (context.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('Error: $e')),
+                  );
+                }
+              }
+            },
+            style: ElevatedButton.styleFrom(backgroundColor: AppTheme.errorColor),
+            child: const Text('Eliminar'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  String _getStatusText(TaskStatus status) {
+    switch (status) {
+      case TaskStatus.pending:
+        return 'Pendientes';
+      case TaskStatus.inProgress:
+        return 'En Progreso';
+      case TaskStatus.completed:
+        return 'Completadas';
+      case TaskStatus.approved:
+        return 'Aprobadas';
+      case TaskStatus.rejected:
+        return 'Rechazadas';
+    }
+  }
+
+  void _showAddTaskDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) => const _AddTaskDialog(),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final tasksAsync = ref.watch(allTasksProvider);
@@ -80,7 +149,7 @@ class _TasksManagementScreenState extends ConsumerState<TasksManagementScreen> {
             data: (tasks) {
               final filteredTasks = tasks.where((task) {
                 final matchesSearch = task.title.toLowerCase().contains(_searchQuery.toLowerCase()) ||
-                                    task.description.toLowerCase().contains(_searchQuery.toLowerCase());
+                                      task.description.toLowerCase().contains(_searchQuery.toLowerCase());
                 final matchesStatus = _filterStatus == null || task.status == _filterStatus;
                 return matchesSearch && matchesStatus;
               }).toList();
@@ -113,7 +182,12 @@ class _TasksManagementScreenState extends ConsumerState<TasksManagementScreen> {
                 itemCount: filteredTasks.length,
                 itemBuilder: (context, index) {
                   final task = filteredTasks[index];
-                  return _TaskCard(task: task);
+                  // Pasamos los callbacks a la tarjeta
+                  return _TaskCard(
+                    task: task,
+                    onEdit: () => _showEditTaskDialog(context, task),
+                    onDelete: () => _showDeleteConfirmation(context, task),
+                  );
                 },
               );
             },
@@ -124,79 +198,20 @@ class _TasksManagementScreenState extends ConsumerState<TasksManagementScreen> {
       ],
     );
   }
-
-  String _getStatusText(TaskStatus status) {
-    switch (status) {
-      case TaskStatus.pending:
-        return 'Pendientes';
-      case TaskStatus.inProgress:
-        return 'En Progreso';
-      case TaskStatus.completed:
-        return 'Completadas';
-      case TaskStatus.approved:
-        return 'Aprobadas';
-      case TaskStatus.rejected:
-        return 'Rechazadas';
-    }
-  }
-
-  void _showAddTaskDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (context) => const _AddTaskDialog(),
-    );
-  }
-
-  void _showEditTaskDialog(BuildContext context, TaskModel task) {
-    showDialog(
-      context: context,
-      builder: (context) => _EditTaskDialog(task: task),
-    );
-  }
-
-  void _showDeleteConfirmation(BuildContext context, WidgetRef ref, TaskModel task) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Eliminar Tarea'),
-        content: Text('¿Estás seguro de que quieres eliminar "${task.title}"?'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Cancelar'),
-          ),
-          ElevatedButton(
-            onPressed: () async {
-              try {
-                final adminService = ref.read(adminServiceProvider);
-                await adminService.deleteTask(task.id);
-                if (context.mounted) {
-                  Navigator.of(context).pop();
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Tarea eliminada')),
-                  );
-                }
-              } catch (e) {
-                if (context.mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('Error: $e')),
-                  );
-                }
-              }
-            },
-            style: ElevatedButton.styleFrom(backgroundColor: AppTheme.errorColor),
-            child: const Text('Eliminar'),
-          ),
-        ],
-      ),
-    );
-  }
 }
+
+// ---
 
 class _TaskCard extends ConsumerWidget {
   final TaskModel task;
+  final VoidCallback onEdit;
+  final VoidCallback onDelete;
   
-  const _TaskCard({required this.task});
+  const _TaskCard({
+    required this.task,
+    required this.onEdit,
+    required this.onDelete,
+  });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -245,12 +260,9 @@ class _TaskCard extends ConsumerWidget {
                   ],
                   onSelected: (value) {
                     if (value == 'edit') {
-                      showDialog(
-                        context: context,
-                        builder: (context) => _EditTaskDialog(task: task),
-                      );
+                      onEdit(); // Usamos el callback pasado por el padre
                     } else if (value == 'delete') {
-                      _showDeleteConfirmationDialog(context, ref, task);
+                      onDelete(); // Usamos el callback pasado por el padre
                     }
                   },
                 ),
@@ -307,45 +319,9 @@ class _TaskCard extends ConsumerWidget {
       ),
     );
   }
-
-  void _showDeleteConfirmationDialog(BuildContext context, WidgetRef ref, TaskModel task) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Eliminar Tarea'),
-        content: Text('¿Estás seguro de que quieres eliminar "${task.title}"?'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Cancelar'),
-          ),
-          ElevatedButton(
-            onPressed: () async {
-              try {
-                final adminService = ref.read(adminServiceProvider);
-                await adminService.deleteTask(task.id);
-                if (context.mounted) {
-                  Navigator.of(context).pop();
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Tarea eliminada')),
-                  );
-                }
-              } catch (e) {
-                if (context.mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('Error: $e')),
-                  );
-                }
-              }
-            },
-            style: ElevatedButton.styleFrom(backgroundColor: AppTheme.errorColor),
-            child: const Text('Eliminar'),
-          ),
-        ],
-      ),
-    );
-  }
 }
+
+// ---
 
 class _StatusChip extends StatelessWidget {
   final TaskStatus status;
@@ -398,6 +374,8 @@ class _StatusChip extends StatelessWidget {
   }
 }
 
+// ---
+
 class _AddTaskDialog extends ConsumerStatefulWidget {
   const _AddTaskDialog();
 
@@ -421,7 +399,8 @@ class _AddTaskDialogState extends ConsumerState<_AddTaskDialog> {
 
   @override
   Widget build(BuildContext context) {
-    final locationsAsync = ref.watch(allLocationsProvider);
+    // Nota: allLocationsProvider debería estar definido en otro archivo (AdminService).
+    final locationsAsync = ref.watch(allLocationsProvider); 
     
     return AlertDialog(
       title: const Text('Crear Tarea'),
@@ -455,7 +434,7 @@ class _AddTaskDialogState extends ConsumerState<_AddTaskDialog> {
                 onChanged: (value) => setState(() => _selectedSucursalId = value),
                 validator: (value) => value == null ? 'Campo requerido' : null,
               ),
-              loading: () => const CircularProgressIndicator(),
+              loading: () => const Center(child: CircularProgressIndicator()),
               error: (error, stack) => Text('Error: $error'),
             ),
           ],
@@ -511,6 +490,8 @@ class _AddTaskDialogState extends ConsumerState<_AddTaskDialog> {
   }
 }
 
+// ---
+
 class _EditTaskDialog extends ConsumerStatefulWidget {
   final TaskModel task;
   
@@ -544,7 +525,8 @@ class _EditTaskDialogState extends ConsumerState<_EditTaskDialog> {
 
   @override
   Widget build(BuildContext context) {
-    final locationsAsync = ref.watch(allLocationsProvider);
+    // Nota: allLocationsProvider debería estar definido en otro archivo (AdminService).
+    final locationsAsync = ref.watch(allLocationsProvider); 
     
     return AlertDialog(
       title: const Text('Editar Tarea'),
@@ -578,7 +560,7 @@ class _EditTaskDialogState extends ConsumerState<_EditTaskDialog> {
                 onChanged: (value) => setState(() => _selectedSucursalId = value),
                 validator: (value) => value == null ? 'Campo requerido' : null,
               ),
-              loading: () => const CircularProgressIndicator(),
+              loading: () => const Center(child: CircularProgressIndicator()),
               error: (error, stack) => Text('Error: $error'),
             ),
           ],
@@ -603,34 +585,40 @@ class _EditTaskDialogState extends ConsumerState<_EditTaskDialog> {
     );
   }
 
-  Future<void> _updateTask() async {
-    if (!_formKey.currentState!.validate()) return;
+  // En tasks_management_screen.dart, dentro de _EditTaskDialogState
+
+Future<void> _updateTask() async {
+  if (!_formKey.currentState!.validate()) return;
+  
+  setState(() => _isLoading = true);
+  
+  try {
+    // 1. Crear la tarea actualizada usando copyWith
+    final updatedTask = widget.task.copyWith(
+      title: _titleController.text,
+      description: _descriptionController.text,
+      sucursalId: _selectedSucursalId, // nullable, por eso se pasa directo
+    );
     
-    setState(() => _isLoading = true);
+    final adminService = ref.read(adminServiceProvider);
     
-    try {
-      final adminService = ref.read(adminServiceProvider);
-      await adminService.updateTask(
-        taskId: widget.task.id,
-        title: _titleController.text,
-        description: _descriptionController.text,
-        sucursalId: _selectedSucursalId!,
+    // 2. Llamar a updateTask pasando el objeto TaskModel actualizado
+    await adminService.updateTask(updatedTask); // ¡CORRECCIÓN!
+    
+    if (mounted) {
+      Navigator.of(context).pop();
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Tarea actualizada exitosamente')),
       );
-      
-      if (mounted) {
-        Navigator.of(context).pop();
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Tarea actualizada exitosamente')),
-        );
-      }
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: $e')),
-        );
-      }
-    } finally {
-      if (mounted) setState(() => _isLoading = false);
     }
+  } catch (e) {
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error: $e')),
+      );
+    }
+  } finally {
+    if (mounted) setState(() => _isLoading = false);
   }
+}
 }

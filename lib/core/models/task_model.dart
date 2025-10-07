@@ -79,4 +79,41 @@ class TaskModel {
       'supervisorComment': supervisorComment,
     };
   }
+
+  // AÑADIR ESTE MÉTODO PARA RESOLVER EL ERROR
+  TaskModel copyWith({
+    String? id,
+    String? sucursalId,
+    String? title,
+    String? description,
+    TaskStatus? status,
+    String? repositorId,
+    DateTime? createdAt,
+    DateTime? completedAt,
+    int? cantidadRepuesta,
+    String? observaciones,
+    String? fotoAntes,
+    String? fotoDespues,
+    double? latitude,
+    double? longitude,
+    String? supervisorComment,
+  }) {
+    return TaskModel(
+      id: id ?? this.id,
+      sucursalId: sucursalId ?? this.sucursalId,
+      title: title ?? this.title,
+      description: description ?? this.description,
+      status: status ?? this.status,
+      repositorId: repositorId ?? this.repositorId,
+      createdAt: createdAt ?? this.createdAt,
+      completedAt: completedAt ?? this.completedAt,
+      cantidadRepuesta: cantidadRepuesta ?? this.cantidadRepuesta,
+      observaciones: observaciones ?? this.observaciones,
+      fotoAntes: fotoAntes ?? this.fotoAntes,
+      fotoDespues: fotoDespues ?? this.fotoDespues,
+      latitude: latitude ?? this.latitude,
+      longitude: longitude ?? this.longitude,
+      supervisorComment: supervisorComment ?? this.supervisorComment,
+    );
+  }
 }

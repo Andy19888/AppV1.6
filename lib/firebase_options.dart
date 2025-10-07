@@ -7,13 +7,13 @@ import 'package:flutter/foundation.dart'
 /// Default [FirebaseOptions] for use with your Firebase apps.
 ///
 /// Example:
-/// \`\`\`dart
+/// ```dart
 /// import 'firebase_options.dart';
 /// // ...
 /// await Firebase.initializeApp(
 ///   options: DefaultFirebaseOptions.currentPlatform,
 /// );
-/// \`\`\`
+/// ```
 class DefaultFirebaseOptions {
   static FirebaseOptions get currentPlatform {
     if (kIsWeb) {
@@ -27,7 +27,9 @@ class DefaultFirebaseOptions {
       case TargetPlatform.macOS:
         return macos;
       case TargetPlatform.windows:
-        return web;
+        // Nota: Usar la configuración 'web' para Windows puede ser suficiente si no tienes
+        // una configuración nativa separada, como estaba en tu código original.
+        return web; 
       case TargetPlatform.linux:
         throw UnsupportedError(
           'DefaultFirebaseOptions have not been configured for linux - '
@@ -41,13 +43,21 @@ class DefaultFirebaseOptions {
   }
 
   static const FirebaseOptions web = FirebaseOptions(
-    apiKey: '1:1045857395927:web:ab393768f10b0298113c92',
-    appId: '1:1045857395927:web:ab393768f10b0298113c92',
+    // CLAVE API CORREGIDA: Se inserta la clave real que empieza con AIzaSy...
+    apiKey: 'AIzaSyDPrWkOfLiRpU5bDSHTvNzKYbyjVvCfNu', 
+    
+    // El App ID, que es el identificador único de la aplicación web.
+    appId: '1:1045857395927:web:ab393768f10b0298113c92', 
+    
     messagingSenderId: '1045857395927',
-    projectId: 'repocheck-app',
-    authDomain: 'repocheck-app.firebaseapp.com',
-    storageBucket: 'repocheck-app.appspot.com',
+    projectId: 'proyectoalumnos-15b79',
+    authDomain: 'proyectoalumnos-15b79.firebaseapp.com',
+    storageBucket: 'proyectoalumnos-15b79.appspot.com',
   );
+
+  // NOTA: Estas secciones están incompletas (usan placeholders) y deben 
+  // ser llenadas con los datos generados por flutterfire configure si planeas
+  // compilar para Android/iOS/macOS.
 
   static const FirebaseOptions android = FirebaseOptions(
     apiKey: 'your-android-api-key',
