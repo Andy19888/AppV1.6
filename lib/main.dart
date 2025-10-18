@@ -5,35 +5,44 @@ import 'package:go_router/go_router.dart';
 import 'core/router/app_router.dart';
 import 'core/theme/app_theme.dart';
 import 'firebase_options.dart';
-import 'dart:io' show Platform; // Asegúrate de que esta línea esté presente
-import 'package:firebase_core/firebase_core.dart'; 
-import 'package:flutter/material.dart';
 
-void main() async {
+void main() {
   WidgetsFlutterBinding.ensureInitialized();
-
-  // Inicialización INCONDICIONAL
-  // Esto inicializa Firebase en todas las plataformas, incluyendo Windows.
-  await Firebase.initializeApp(
-      options: DefaultFirebaseOptions.currentPlatform,
-  );
-
   runApp(const ProviderScope(child: MyApp()));
 }
-// CORRECCIÓN: Clase renombrada a MyApp y se asegura el constructor 'const'
+
 class MyApp extends ConsumerWidget {
-  const MyApp({super.key}); // <-- Aquí está la corrección
+  const MyApp({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final router = ref.watch(routerProvider);
-    
-    return MaterialApp.router(
-      title: 'RepoCheck',
-      theme: AppTheme.lightTheme,
-      darkTheme: AppTheme.darkTheme,
-      routerConfig: router,
-      debugShowCheckedModeBanner: false,
+    return FutureBuilder(
+      future: Firebase.initializeApp(
+        options: DefaultFirebaseOptions.currentPlatform,
+      ),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const MaterialApp(
+            home: Scaffold(
+              body: Center(child: CircularProgressIndicator()),
+            ),
+          );
+        } else if (snapshot.hasError) {
+          return MaterialApp(
+            home: Scaffold(
+              body: Center(child: Text('Error al inicializar Firebase')),
+            ),
+          );
+        }
+        final router = ref.watch(routerProvider);
+        return MaterialApp.router(
+          title: 'RepoCheck',
+          theme: AppTheme.lightTheme,
+          darkTheme: AppTheme.darkTheme,
+          routerConfig: router,
+          debugShowCheckedModeBanner: false,
+        );
+      },
     );
   }
 }

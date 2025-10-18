@@ -81,10 +81,7 @@ class AuthService {
   // Update user data
   Future<void> updateUserData(UserModel user) async {
     try {
-      await _firestore
-          .collection('users')
-          .doc(user.id)
-          .update(user.toJson());
+      await _firestore.collection('users').doc(user.id).update(user.toJson());
     } catch (e) {
       throw Exception('Error updating user data: $e');
     }
@@ -133,30 +130,25 @@ final authServiceProvider = Provider<AuthService>((ref) => AuthService());
 final authStateProvider = StreamProvider<User?>((ref) {
   final authService = ref.watch(authServiceProvider);
 
-  // CORRECCIÓN CLAVE: Aplicar un timeout y resolver a null si tarda mucho.
-  // Esto previene que la aplicación se quede en 'loading' si la conexión
-  // inicial es lenta o inestable, forzando la redirección a la pantalla de login.
+  // ✅ Corrección: timeout seguro, sin cerrar el sink.
+  // Se emite `null` en caso de timeout sin intentar cerrar el stream.
   return authService.authStateChanges.timeout(
-    const Duration(seconds: 4), // 4 segundos de límite para la carga inicial
+    const Duration(seconds: 4),
     onTimeout: (sink) {
-      // Si hay timeout, cerramos el stream actual y enviamos null (no autenticado)
-      sink.close();
-      sink.add(null); 
+      sink.add(null); // Solo emitimos null, sin cerrar el stream.
     },
   );
 });
-
 
 // Provider for current user data
 final currentUserProvider = FutureProvider<UserModel?>((ref) async {
   final authState = ref.watch(authStateProvider);
   final authService = ref.watch(authServiceProvider);
-  
+
   return authState.when(
     data: (user) async {
       if (user != null) {
-        // La línea que estaba marcada en rojo antes
-        return await authService.getUserData(user.uid); 
+        return await authService.getUserData(user.uid);
       }
       return null;
     },
